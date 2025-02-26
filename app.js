@@ -2,8 +2,31 @@ const express = require("express");
 const app = express();
 const port = process.env.PORT || 3001;
 
-app.get("/", (req, res) => res.type('html').send(html));
+const handleWebhook = (req, res) => {
+  const { JobID } = req.body;
 
+  if (!JobID) {
+      return res.status(400).send('JobID is required');
+  }
+
+  console.log(`Received webhook with JobID: ${JobID}`);
+  res.status(200).send('Webhook received');
+};
+
+const router = express.Router();
+
+function setRoutes(app) {
+    router.post('/webhook', handleWebhook);
+    router.get("/", (req, res) => res.type('html').send(html));
+    app.use('/', router);
+}
+
+// app.get("/", (req, res) => res.type('html').send(html));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+setRoutes(app);
 const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
 server.keepAliveTimeout = 120 * 1000;
